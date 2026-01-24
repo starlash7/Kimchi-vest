@@ -1,112 +1,119 @@
 'use client';
 
-import { usePrivy } from '@privy-io/react-auth';
-import { useState } from 'react';
+import { useAuth } from '@/components/Providers';
+import { useState, useEffect } from 'react';
 import Background from '@/components/Background';
 import IntroSequence from '@/components/IntroSequence';
 
 export default function Home() {
-    const { login, logout, authenticated, user } = usePrivy();
+    const { login, logout, authenticated, user } = useAuth();
     const [showIntro, setShowIntro] = useState(true);
+    const [liveData, setLiveData] = useState<{ id: string; name: string; status: string }[]>([]);
+
+    useEffect(() => {
+        const mockCoins = [
+            { id: '1', name: '$KIMCHI', status: '85% Bonded' },
+            { id: '2', name: '$PUMP', status: 'Searching...' },
+            { id: '3', name: '$SOL', status: 'Stable' },
+        ];
+        setLiveData(mockCoins);
+    }, []);
 
     return (
-        <div style={{ position: 'relative', width: '100%', height: '100vh' }}>
+        <div className="main-viewport">
             {showIntro && <IntroSequence onFinish={() => setShowIntro(false)} />}
 
             <Background />
 
+            {/* Elite Overlay Layer */}
             <div style={{
                 position: 'absolute',
                 inset: 0,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                padding: '2rem',
+                display: 'grid',
+                gridTemplateColumns: 'repeat(12, 1fr)',
+                gridTemplateRows: 'repeat(12, 1fr)',
+                gap: '1.5rem',
+                padding: '4rem',
                 zIndex: 10
             }}>
-                <div style={{ textAlign: 'center', marginBottom: '3rem' }}>
-                    <h1 className="logo-text" style={{ marginBottom: '0.5rem' }}>KIMCHI<br />-VEST</h1>
-                    <p style={{
-                        opacity: 0.8,
-                        fontSize: '1.4rem',
-                        color: 'var(--accent)',
-                        fontWeight: 'bold',
-                        letterSpacing: '2px'
-                    }}>
-                        FUEL YOUR FUTURE WITH FLAVOR
-                    </p>
+                {/* Header Section */}
+                <div style={{ gridColumn: '1 / 6', gridRow: '1 / 4' }}>
+                    <p className="neon-subtitle" style={{ marginBottom: '1rem' }}>SYSTEM V0.1</p>
+                    <h1 className="hero-title">KIMCHI<br />VEST</h1>
                 </div>
 
-                <div className="clay-card" style={{ padding: '3rem', width: '100%', maxWidth: '600px', textAlign: 'center' }}>
-                    {authenticated ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-                            <p style={{ fontSize: '1.2rem', color: 'white' }}>
-                                Welcome back, <span style={{ color: 'var(--accent)' }}>{user?.email?.address || 'Explorer'}</span>
-                            </p>
-                            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-                                <button className="btn-primary" style={{
-                                    padding: '1rem 2.5rem',
-                                    borderRadius: '16px',
-                                    background: 'var(--accent)',
-                                    color: 'black',
-                                    fontWeight: '900',
-                                    border: 'none',
-                                    cursor: 'pointer',
-                                    fontSize: '1.1rem',
-                                    boxShadow: '0 4px 0px #00cc6a'
-                                }}>
-                                    ENTER DASHBOARD
-                                </button>
-                                <button onClick={logout} style={{
-                                    padding: '1rem 2.5rem',
-                                    borderRadius: '16px',
-                                    border: '2px solid rgba(255,255,255,0.2)',
-                                    background: 'transparent',
-                                    color: 'white',
-                                    cursor: 'pointer',
-                                    fontWeight: 'bold'
-                                }}>
-                                    LOGOUT
-                                </button>
+                {/* Main Action Card (Bento Large) */}
+                <div className="bento-card" style={{ gridColumn: '1 / 7', gridRow: '4 / 10', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                    <div style={{ textAlign: 'left' }}>
+                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem' }}>
+                            {authenticated ? 'AGENT ACTIVE' : 'PREDICT THE GRADUATION'}
+                        </h2>
+                        <p style={{ opacity: 0.6, fontSize: '1.2rem', marginBottom: '2.5rem', maxWidth: '400px' }}>
+                            AI-driven prediction markets for the next big Solana meme-coins. No trading, just pure winning.
+                        </p>
+
+                        {authenticated ? (
+                            <div style={{ display: 'flex', gap: '1.5rem' }}>
+                                <button className="tactile-button btn-neon">DASHBOARD</button>
+                                <button onClick={logout} className="tactile-button" style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}>LOGOUT</button>
                             </div>
-                        </div>
-                    ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-                            <p style={{ opacity: 0.7, fontSize: '1.1rem' }}>
-                                Predict Pump.fun graduations with AI-powered live odds.
-                            </p>
-                            <button onClick={login} style={{
-                                padding: '1.2rem 3rem',
-                                borderRadius: '20px',
-                                background: '#ff4d4d',
-                                color: 'white',
-                                fontWeight: '900',
-                                border: 'none',
-                                cursor: 'pointer',
-                                fontSize: '1.3rem',
-                                boxShadow: '0 6px 0px #cc3d3d',
-                                transition: 'all 0.1s'
-                            }}
-                                onMouseDown={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(4px)';
-                                    e.currentTarget.style.boxShadow = '0 2px 0px #cc3d3d';
-                                }}
-                                onMouseUp={(e) => {
-                                    e.currentTarget.style.transform = 'translateY(0)';
-                                    e.currentTarget.style.boxShadow = '0 6px 0px #cc3d3d';
-                                }}
-                            >
-                                START BETTING
-                            </button>
-                        </div>
-                    )}
+                        ) : (
+                            <button onClick={login} className="tactile-button btn-kimchi">START BETTING NOW</button>
+                        )}
+                    </div>
                 </div>
 
-                <div style={{ marginTop: '4rem', display: 'flex', gap: '2rem', opacity: 0.5 }}>
-                    <span style={{ fontSize: '0.9rem' }}>SOLANA MAINNET</span>
-                    <span style={{ fontSize: '0.9rem' }}>AI ORACLE V0.1</span>
-                    <span style={{ fontSize: '0.9rem' }}>© 2026 KIMCHI-VEST</span>
+                {/* Live Stats Card (Bento Small) */}
+                <div className="bento-card" style={{ gridColumn: '7 / 10', gridRow: '1 / 5' }}>
+                    <h3 style={{ fontSize: '0.9rem', opacity: 0.5, marginBottom: '1.5rem', letterSpacing: '2px' }}>LIVE SCANNER</h3>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        {liveData.map(coin => (
+                            <div key={coin.id} style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                                <span style={{ fontWeight: 700 }}>{coin.name}</span>
+                                <span style={{ color: 'var(--accent)', fontSize: '0.9rem' }}>{coin.status}</span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* AI Sentiment Card (Bento Small) */}
+                <div className="bento-card" style={{ gridColumn: '10 / 13', gridRow: '1 / 7' }}>
+                    <h3 style={{ fontSize: '0.9rem', opacity: 0.5, marginBottom: '2rem', letterSpacing: '2px' }}>AI ORACLE</h3>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--accent)' }}>98.2%</div>
+                    <p style={{ opacity: 0.4, fontSize: '0.8rem', marginTop: '0.5rem' }}>Global Prediction Accuracy</p>
+                    <div style={{ marginTop: '2rem', width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
+                        <div style={{ width: '98%', height: '100%', background: 'var(--accent)', borderRadius: '2px' }} />
+                    </div>
+                </div>
+
+                {/* Data Feed Card (Bento Long) */}
+                <div className="bento-card" style={{ gridColumn: '7 / 13', gridRow: '7 / 12' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                        <h3 style={{ fontSize: '0.9rem', opacity: 0.5, letterSpacing: '2px' }}>TERMINAL_LOGS</h3>
+                        <div style={{ width: '8px', height: '8px', background: 'var(--accent)', borderRadius: '50%', boxShadow: '0 0 10px var(--accent)' }} />
+                    </div>
+                    <div style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
+                        <div>[15:12:01] SCANNING NEW POOL: $CHILI</div>
+                        <div>[15:12:05] ANALYZING BONDING CURVE...</div>
+                        <div style={{ color: 'var(--accent)' }}>[15:12:10] PREDICTION: 85% PROBABILITY</div>
+                        <div>[15:12:15] UPDATING ODDS TO 1.45x...</div>
+                    </div>
+                </div>
+
+                {/* Footer Badges */}
+                <div style={{ gridColumn: '1 / 7', gridRow: '10 / 13', display: 'flex', alignItems: 'flex-end', gap: '3rem', opacity: 0.3 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 900 }}>NETWORK</span>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>SOLANA</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 900 }}>SECURED BY</span>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>PRIVY</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <span style={{ fontSize: '0.7rem', fontWeight: 900 }}>ORACLE v0.1</span>
+                        <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>K-RETRO-FUTURE</span>
+                    </div>
                 </div>
             </div>
         </div>

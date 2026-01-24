@@ -18,8 +18,8 @@ export default function Background() {
     }, []);
 
     return (
-        <div className="main-container">
-            <div className="star-field">
+        <div className="main-viewport">
+            <div className="star-field-container">
                 {stars.map((star) => (
                     <div
                         key={star.id}
@@ -34,7 +34,7 @@ export default function Background() {
                     />
                 ))}
             </div>
-            <div className="grid-floor" />
+            <div className="perspective-grid" />
         </div>
     );
 }
