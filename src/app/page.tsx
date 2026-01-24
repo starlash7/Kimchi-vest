@@ -13,8 +13,8 @@ export default function Home() {
     useEffect(() => {
         const mockCoins = [
             { id: '1', name: '$KIMCHI', status: '85% Bonded' },
-            { id: '2', name: '$PUMP', status: 'Searching...' },
-            { id: '3', name: '$SOL', status: 'Stable' },
+            { id: '2', name: '$PUMP', status: 'Live' },
+            { id: '3', name: '$SOL', status: 'Graduating' },
         ];
         setLiveData(mockCoins);
     }, []);
@@ -25,96 +25,78 @@ export default function Home() {
 
             <Background />
 
-            {/* Elite Overlay Layer */}
-            <div style={{
-                position: 'absolute',
-                inset: 0,
-                display: 'grid',
-                gridTemplateColumns: 'repeat(12, 1fr)',
-                gridTemplateRows: 'repeat(12, 1fr)',
-                gap: '1.5rem',
-                padding: '4rem',
-                zIndex: 10
-            }}>
-                {/* Header Section */}
-                <div style={{ gridColumn: '1 / 6', gridRow: '1 / 4' }}>
-                    <p className="neon-subtitle" style={{ marginBottom: '1rem' }}>SYSTEM V0.1</p>
+            {/* Main Content Layout */}
+            <div className="dashboard-layout">
+
+                {/* 1. Brand Side */}
+                <div style={{ gridColumn: '1 / 6' }}>
+                    <div className="status-tag" style={{ marginBottom: '1.5rem' }}>INTERNAL SYSTEM V0.1</div>
                     <h1 className="hero-title">KIMCHI<br />VEST</h1>
+                    <p style={{ opacity: 0.5, fontSize: '1.2rem', marginTop: '1rem', maxWidth: '400px' }}>
+                        The ultimate AI-powered prediction oracle for Solana.
+                        Bet on the next generation of tokens before they hit Raydium.
+                    </p>
                 </div>
 
-                {/* Main Action Card (Bento Large) */}
-                <div className="bento-card" style={{ gridColumn: '1 / 7', gridRow: '4 / 10', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <div style={{ textAlign: 'left' }}>
-                        <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1rem' }}>
-                            {authenticated ? 'AGENT ACTIVE' : 'PREDICT THE GRADUATION'}
-                        </h2>
-                        <p style={{ opacity: 0.6, fontSize: '1.2rem', marginBottom: '2.5rem', maxWidth: '400px' }}>
-                            AI-driven prediction markets for the next big Solana meme-coins. No trading, just pure winning.
-                        </p>
-
-                        {authenticated ? (
-                            <div style={{ display: 'flex', gap: '1.5rem' }}>
-                                <button className="tactile-button btn-neon">DASHBOARD</button>
-                                <button onClick={logout} className="tactile-button" style={{ background: 'rgba(255,255,255,0.1)', color: 'white' }}>LOGOUT</button>
-                            </div>
-                        ) : (
-                            <button onClick={login} className="tactile-button btn-kimchi">START BETTING NOW</button>
-                        )}
+                {/* 2. Top Stats */}
+                <div className="bento-card" style={{ gridColumn: '7 / 10' }}>
+                    <h3 style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '1rem', letterSpacing: '2px' }}>AI ACCURACY</h3>
+                    <div style={{ fontSize: '2.5rem', fontWeight: 900, color: 'var(--accent)' }}>98.2%</div>
+                    <div style={{ marginTop: '0.5rem', height: '4px', background: 'rgba(255,255,255,0.05)', borderRadius: '2px' }}>
+                        <div style={{ width: '98%', height: '100%', background: 'var(--accent)' }} />
                     </div>
                 </div>
 
-                {/* Live Stats Card (Bento Small) */}
-                <div className="bento-card" style={{ gridColumn: '7 / 10', gridRow: '1 / 5' }}>
-                    <h3 style={{ fontSize: '0.9rem', opacity: 0.5, marginBottom: '1.5rem', letterSpacing: '2px' }}>LIVE SCANNER</h3>
+                <div className="bento-card" style={{ gridColumn: '10 / 13' }}>
+                    <h3 style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '1rem', letterSpacing: '2px' }}>NETWORK</h3>
+                    <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>SOLANA</div>
+                    <p style={{ opacity: 0.3, fontSize: '0.9rem' }}>Mainnet-Beta</p>
+                </div>
+
+                {/* 3. Hero CTA Card */}
+                <div className="bento-card" style={{ gridColumn: '1 / 8', marginTop: '1.5rem', display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '300px' }}>
+                    <h2 style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '1.5rem' }}>
+                        {authenticated ? 'CONNECTION ACTIVE' : 'SECURE YOUR PREDICTIONS'}
+                    </h2>
+
+                    {authenticated ? (
+                        <div style={{ display: 'flex', gap: '1rem' }}>
+                            <button className="tactile-btn btn-primary">GO TO BOARD</button>
+                            <button onClick={logout} className="tactile-btn" style={{ background: 'rgba(255,255,255,0.05)', color: '#fff' }}>DISCONNECT</button>
+                        </div>
+                    ) : (
+                        <button onClick={login} className="tactile-btn btn-secondary">INITIATE CONNECTION</button>
+                    )}
+                </div>
+
+                {/* 4. Live Scanner Feed */}
+                <div className="bento-card" style={{ gridColumn: '8 / 13', marginTop: '1.5rem' }}>
+                    <h3 style={{ fontSize: '0.8rem', opacity: 0.4, marginBottom: '1.5rem', letterSpacing: '2px' }}>LIVE_ORACLE_FEED</h3>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
                         {liveData.map(coin => (
-                            <div key={coin.id} style={{ display: 'flex', justifyContent: 'space-between', paddingBottom: '0.5rem', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                            <div key={coin.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                 <span style={{ fontWeight: 700 }}>{coin.name}</span>
-                                <span style={{ color: 'var(--accent)', fontSize: '0.9rem' }}>{coin.status}</span>
+                                <span className="status-tag" style={{ fontSize: '0.65rem' }}>{coin.status}</span>
                             </div>
                         ))}
                     </div>
                 </div>
 
-                {/* AI Sentiment Card (Bento Small) */}
-                <div className="bento-card" style={{ gridColumn: '10 / 13', gridRow: '1 / 7' }}>
-                    <h3 style={{ fontSize: '0.9rem', opacity: 0.5, marginBottom: '2rem', letterSpacing: '2px' }}>AI ORACLE</h3>
-                    <div style={{ fontSize: '1.5rem', fontWeight: 900, color: 'var(--accent)' }}>98.2%</div>
-                    <p style={{ opacity: 0.4, fontSize: '0.8rem', marginTop: '0.5rem' }}>Global Prediction Accuracy</p>
-                    <div style={{ marginTop: '2rem', width: '100%', height: '4px', background: 'rgba(255,255,255,0.1)', borderRadius: '2px' }}>
-                        <div style={{ width: '98%', height: '100%', background: 'var(--accent)', borderRadius: '2px' }} />
+                {/* 5. Terminal Logs */}
+                <div className="bento-card" style={{ gridColumn: '1 / 13', marginTop: '1.5rem' }}>
+                    <div style={{ fontFamily: 'monospace', fontSize: '0.85rem', color: 'rgba(255,255,255,0.4)', lineHeight: 2 }}>
+                        <div><span style={{ color: 'var(--accent)' }}>[OK]</span> BOOTING ENGINE... DONE.</div>
+                        <div><span style={{ color: 'var(--accent)' }}>[OK]</span> SCANNING PUMP.FUN... 45 NEW CONTRACTS DETECTED.</div>
+                        <div style={{ color: 'white' }}>&gt; AI ANALYSIS IN PROGRESS: $KIMCHI SHOWS HIGH GRADUATION PROBABILITY (85%)</div>
+                        <div>[WAIT] UPDATING LIQUIDITY ORACLE... SYNCING...</div>
                     </div>
                 </div>
 
-                {/* Data Feed Card (Bento Long) */}
-                <div className="bento-card" style={{ gridColumn: '7 / 13', gridRow: '7 / 12' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-                        <h3 style={{ fontSize: '0.9rem', opacity: 0.5, letterSpacing: '2px' }}>TERMINAL_LOGS</h3>
-                        <div style={{ width: '8px', height: '8px', background: 'var(--accent)', borderRadius: '50%', boxShadow: '0 0 10px var(--accent)' }} />
-                    </div>
-                    <div style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'rgba(255,255,255,0.5)', lineHeight: 1.6 }}>
-                        <div>[15:12:01] SCANNING NEW POOL: $CHILI</div>
-                        <div>[15:12:05] ANALYZING BONDING CURVE...</div>
-                        <div style={{ color: 'var(--accent)' }}>[15:12:10] PREDICTION: 85% PROBABILITY</div>
-                        <div>[15:12:15] UPDATING ODDS TO 1.45x...</div>
-                    </div>
-                </div>
+            </div>
 
-                {/* Footer Badges */}
-                <div style={{ gridColumn: '1 / 7', gridRow: '10 / 13', display: 'flex', alignItems: 'flex-end', gap: '3rem', opacity: 0.3 }}>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 900 }}>NETWORK</span>
-                        <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>SOLANA</span>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 900 }}>SECURED BY</span>
-                        <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>PRIVY</span>
-                    </div>
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <span style={{ fontSize: '0.7rem', fontWeight: 900 }}>ORACLE v0.1</span>
-                        <span style={{ fontSize: '1.1rem', fontWeight: 700 }}>K-RETRO-FUTURE</span>
-                    </div>
-                </div>
+            {/* Static Footer (Floating) */}
+            <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', opacity: 0.2, fontSize: '0.8rem', zIndex: 100 }}>
+                © 2026 KIMCHI-VEST. ALL RIGHTS RESERVED.
             </div>
         </div>
     )
