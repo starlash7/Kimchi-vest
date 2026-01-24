@@ -3,9 +3,12 @@
 import { PrivyProvider } from '@privy-io/react-auth';
 
 export default function Providers({ children }: { children: React.ReactNode }) {
+    // Using a fallback dummy ID so the UI can be previewed without an .env file
+    const appId = process.env.NEXT_PUBLIC_PRIVY_APP_ID || 'clxp123450000000000000000';
+
     return (
         <PrivyProvider
-            appId={process.env.NEXT_PUBLIC_PRIVY_APP_ID || ''}
+            appId={appId}
             config={{
                 // Customize Privy's appearance in your app
                 appearance: {
