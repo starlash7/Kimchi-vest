@@ -1,7 +1,7 @@
 :root {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-  --accent: #ff4d4d;
+  --background: #0a0a0c;
+  --foreground: #ffffff;
+  --accent: #00ff88;
   --glass: rgba(255, 255, 255, 0.05);
   --glass-border: rgba(255, 255, 255, 0.1);
 }
