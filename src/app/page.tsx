@@ -1,99 +1,278 @@
 'use client';
 
 import { useAuth } from '@/components/Providers';
-import { useState, useEffect } from 'react';
-import Background from '@/components/Background';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import IntroSequence from '@/components/IntroSequence';
 
-export default function Home() {
-    const { login, logout, authenticated, user } = useAuth();
-    const [showIntro, setShowIntro] = useState(true);
-    const [liveData, setLiveData] = useState<{ id: string; name: string; status: string }[]>([]);
+/* ── Inline SVG: Quilted Vest Icon ── */
+function VestIcon() {
+    return (
+        <svg viewBox="0 0 200 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+            {/* Left panel */}
+            <path
+                d="M35 65 L35 210 Q35 220 45 220 L88 220 L88 95 L78 82 L63 42 Q52 25 42 32 L35 65Z"
+                fill="#E8424C" opacity="0.85"
+            />
+            {/* Right panel */}
+            <path
+                d="M165 65 L165 210 Q165 220 155 220 L112 220 L112 95 L122 82 L137 42 Q148 25 158 32 L165 65Z"
+                fill="#E8424C" opacity="0.85"
+            />
+            {/* Neckline */}
+            <path
+                d="M63 42 L88 95 L100 78 L112 95 L137 42 Q120 12 100 18 Q80 12 63 42Z"
+                fill="#E8424C" opacity="0.65"
+            />
+            {/* Quilted diamond lines — left */}
+            <line x1="42" y1="90" x2="82" y2="130" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="42" y1="130" x2="82" y2="170" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="42" y1="170" x2="82" y2="210" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="82" y1="90" x2="42" y2="130" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="82" y1="130" x2="42" y2="170" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="82" y1="170" x2="42" y2="210" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            {/* Quilted diamond lines — right */}
+            <line x1="118" y1="90" x2="158" y2="130" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="118" y1="130" x2="158" y2="170" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="118" y1="170" x2="158" y2="210" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="158" y1="90" x2="118" y2="130" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="158" y1="130" x2="118" y2="170" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            <line x1="158" y1="170" x2="118" y2="210" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+            {/* Pocket — left */}
+            <rect x="48" y="155" width="28" height="32" rx="6" fill="rgba(255,255,255,0.06)" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
+            {/* Trim */}
+            <path
+                d="M88 95 L88 220" stroke="rgba(255,255,255,0.15)" strokeWidth="2"
+            />
+            <path
+                d="M112 95 L112 220" stroke="rgba(255,255,255,0.15)" strokeWidth="2"
+            />
+        </svg>
+    );
+}
+
+/* ── Scroll-reveal hook ── */
+function useReveal() {
+    const ref = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        const mockCoins = [
-            { id: '1', name: '$KIMCHI', status: '85% Bonded' },
-            { id: '2', name: '$PUMP', status: 'Live' },
-            { id: '3', name: '$SOL', status: 'Graduating' },
-        ];
-        setLiveData(mockCoins);
+        const el = ref.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    el.classList.add('visible');
+                }
+            },
+            { threshold: 0.15 }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
     }, []);
 
+    return ref;
+}
+
+/* ── Data ── */
+const features = [
+    {
+        icon: '🔮',
+        title: 'AI Oracle',
+        desc: 'Advanced ML models analyze bonding curves and on-chain data to predict token graduations.',
+    },
+    {
+        icon: '⚡',
+        title: 'Real-time Feed',
+        desc: 'Live monitoring of Pump.fun token launches with instant probability updates.',
+    },
+    {
+        icon: '🎯',
+        title: 'Smart Predictions',
+        desc: 'Place predictions on token outcomes with dynamic odds calculated by our AI agent.',
+    },
+];
+
+const predictions = [
+    { name: '$KIMCHI', percent: 85, status: 'graduating' },
+    { name: '$PUMP', percent: 62, status: 'live' },
+    { name: '$SOLMOON', percent: 91, status: 'bonded' },
+    { name: '$DOGE2', percent: 34, status: 'watching' },
+    { name: '$WAGMI', percent: 78, status: 'graduating' },
+];
+
+const steps = [
+    { num: '01', title: 'Connect', desc: 'Link your wallet with one click via Privy.' },
+    { num: '02', title: 'Discover', desc: 'Browse live token launches on Pump.fun.' },
+    { num: '03', title: 'Predict', desc: 'Place your prediction on token graduation.' },
+    { num: '04', title: 'Collect', desc: 'Win rewards when your predictions hit.' },
+];
+
+/* ══════════════════════════════════════════════════
+   Main Page
+   ══════════════════════════════════════════════════ */
+export default function Home() {
+    const { login, logout, authenticated } = useAuth();
+    const [showIntro, setShowIntro] = useState(true);
+    const [scrolled, setScrolled] = useState(false);
+    const [barsAnimated, setBarsAnimated] = useState(false);
+
+    const featuresRef = useReveal();
+    const predictionsRef = useReveal();
+    const stepsRef = useReveal();
+
+    /* Prediction bars ref for animating on scroll */
+    const predSectionRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const onScroll = () => setScrolled(window.scrollY > 40);
+        window.addEventListener('scroll', onScroll, { passive: true });
+        return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    /* Animate prediction bars when section visible */
+    useEffect(() => {
+        const el = predSectionRef.current;
+        if (!el) return;
+        const observer = new IntersectionObserver(
+            ([entry]) => { if (entry.isIntersecting) setBarsAnimated(true); },
+            { threshold: 0.2 }
+        );
+        observer.observe(el);
+        return () => observer.disconnect();
+    }, []);
+
+    const handleConnect = useCallback(() => {
+        if (authenticated) logout();
+        else login();
+    }, [authenticated, login, logout]);
+
     return (
-        <div className="main-viewport">
+        <>
             {showIntro && <IntroSequence onFinish={() => setShowIntro(false)} />}
 
-            <Background />
-
-            {/* Main Content Layout */}
-            <div className="dashboard-layout">
-
-                {/* Section A: Header & Branding */}
-                <div style={{ gridColumn: '1 / 3', gridRow: '1 / 2', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                    <div className="status-tag" style={{ marginBottom: '1rem', width: 'fit-content' }}>AI ORACLE v0.1 - ACTIVE</div>
-                    <h1 className="hero-title">KIMCHI<br />VEST</h1>
-                    <p style={{ opacity: 0.5, fontSize: '1.1rem', marginTop: '0.8rem', maxWidth: '400px' }}>
-                        The ultimate AI-powered prediction oracle for Solana.
-                    </p>
+            {/* ── Navigation ── */}
+            <nav className={`nav ${scrolled ? 'nav-scrolled' : ''}`}>
+                <div className="nav-logo">KIMCHI VEST</div>
+                <div className="nav-links">
+                    <a href="#features">Features</a>
+                    <a href="#predictions">Predictions</a>
+                    <a href="#how-it-works">How It Works</a>
                 </div>
+                <button className="nav-btn" onClick={handleConnect}>
+                    {authenticated ? 'Disconnect' : 'Connect Wallet'}
+                </button>
+            </nav>
 
-                {/* Section B: Hero CTA (Middle) */}
-                <div className="bento-card card-hero">
-                    <h2 style={{ fontSize: 'clamp(1.5rem, 4vw, 2.8rem)', fontWeight: 900, marginBottom: '1rem' }}>
-                        {authenticated ? 'AGENT CONNECTED' : 'SECURE YOUR BETS'}
-                    </h2>
-                    <p style={{ opacity: 0.4, fontSize: '1rem', marginBottom: '2rem', maxWidth: '350px' }}>
-                        Predict which Pump.fun tokens will hit the bonding curve graduation.
-                    </p>
-
-                    {authenticated ? (
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <button className="tactile-btn btn-primary">ENTER BOARD</button>
-                            <button onClick={logout} className="tactile-btn" style={{ background: 'rgba(255,255,255,0.05)', color: '#fff' }}>LOGOUT</button>
+            {/* ── Hero ── */}
+            <section className="hero quilted-bg">
+                <div className="hero-inner">
+                    <div className="hero-content">
+                        <div className="hero-badge">AI-Powered Prediction Oracle</div>
+                        <h1 className="hero-title">KIMCHI<br />VEST</h1>
+                        <p className="hero-desc">
+                            Predict which Pump.fun tokens will graduate to Raydium.
+                            AI-powered analysis meets community wisdom on Solana.
+                        </p>
+                        <div className="hero-buttons">
+                            <button className="btn btn-primary" onClick={handleConnect}>
+                                {authenticated ? 'Enter Dashboard' : 'Connect Wallet'}
+                            </button>
+                            <a href="#features" className="btn btn-ghost">Learn More</a>
                         </div>
-                    ) : (
-                        <button onClick={login} className="tactile-btn btn-secondary">INITIATE CONNECTION</button>
-                    )}
-                </div>
-
-                {/* Section C: Live Feed (Right) */}
-                <div className="bento-card card-scanner">
-                    <div style={{ marginBottom: '1.5rem' }}>
-                        <h3 style={{ fontSize: '0.75rem', opacity: 0.4, letterSpacing: '2px' }}>LIVE_ORACLE_FEED</h3>
-                        <div style={{ fontSize: '1.8rem', fontWeight: 900, color: 'var(--accent)', marginTop: '0.5rem' }}>98.2%</div>
-                        <p style={{ fontSize: '0.7rem', opacity: 0.3 }}>Global Accuracy</p>
                     </div>
+                    <div className="hero-visual">
+                        <div className="vest-icon-wrapper">
+                            <VestIcon />
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem', flex: 1, overflow: 'hidden' }}>
-                        {liveData.map(coin => (
-                            <div key={coin.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.8rem', background: 'rgba(255,255,255,0.03)', borderRadius: '16px' }}>
-                                <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{coin.name}</span>
-                                <span className="status-tag" style={{ fontSize: '0.6rem', padding: '0.2rem 0.6rem' }}>{coin.status}</span>
+            {/* ── Features ── */}
+            <div id="features" className="section-alt quilted-bg">
+                <div className="section reveal reveal-children" ref={featuresRef}>
+                    <div className="section-label">Why Kimchi Vest?</div>
+                    <h2 className="section-title">Built for Degens,<br />Powered by AI</h2>
+                    <p className="section-subtitle">
+                        Our AI oracle monitors every Pump.fun token launch in real time and predicts graduation probability.
+                    </p>
+                    <div className="features-grid">
+                        {features.map((f) => (
+                            <div key={f.title} className="feature-card">
+                                <div className="feature-icon">{f.icon}</div>
+                                <h3>{f.title}</h3>
+                                <p>{f.desc}</p>
                             </div>
                         ))}
                     </div>
                 </div>
+            </div>
 
-                {/* Section D: Terminal Logs (Bottom Full Width) */}
-                <div className="bento-card card-terminal" style={{ padding: '1.2rem 2rem' }}>
-                    <div style={{ fontFamily: 'monospace', fontSize: '0.8rem', color: 'rgba(255,255,255,0.4)', lineHeight: 1.6 }}>
-                        <div style={{ display: 'flex', gap: '1rem' }}>
-                            <span style={{ color: 'var(--accent)' }}>[OK]</span>
-                            <span>SCANNING PUMP.FUN NETWORK... FOUND 45 NEW CONTRACTS.</span>
+            {/* ── Live Predictions ── */}
+            <div id="predictions" className="predictions-section" ref={predSectionRef}>
+                <div className="section reveal" ref={predictionsRef}>
+                    <div className="predictions-header">
+                        <div>
+                            <div className="section-label">Live Feed</div>
+                            <h2 className="section-title">Token Predictions</h2>
+                            <p className="section-subtitle" style={{ marginBottom: 0 }}>
+                                Real-time graduation probability for trending tokens.
+                            </p>
                         </div>
-                        <div style={{ display: 'flex', gap: '1rem', color: 'white', marginTop: '0.3rem' }}>
-                            <span>&gt;&gt;</span>
-                            <span>AI_ANALYSIS: $KIMCHI SHOWS HIGH GRADUATION PROBABILITY (85.4%)</span>
+                        <div className="predictions-accuracy">
+                            <div className="value">98.2%</div>
+                            <div className="label">Global Accuracy</div>
                         </div>
                     </div>
+                    <div className="predictions-list">
+                        {predictions.map((p) => (
+                            <div key={p.name} className="prediction-row">
+                                <span className="prediction-name">{p.name}</span>
+                                <div className="prediction-bar-track">
+                                    <div
+                                        className="prediction-bar-fill"
+                                        style={{ width: barsAnimated ? `${p.percent}%` : '0%' }}
+                                    />
+                                </div>
+                                <span className="prediction-percent">{p.percent}%</span>
+                                <span className={`prediction-status status-${p.status}`}>
+                                    {p.status}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-
             </div>
 
-            {/* Static Footer (Floating) */}
-            <div style={{ position: 'fixed', bottom: '2rem', right: '2rem', opacity: 0.2, fontSize: '0.8rem', zIndex: 100 }}>
-                © 2026 KIMCHI-VEST. ALL RIGHTS RESERVED.
+            {/* ── How It Works ── */}
+            <div id="how-it-works">
+                <div className="section reveal reveal-children" ref={stepsRef}>
+                    <div className="section-label">Get Started</div>
+                    <h2 className="section-title">How It Works</h2>
+                    <p className="section-subtitle">Four steps to start predicting.</p>
+                    <div className="steps-grid">
+                        {steps.map((s) => (
+                            <div key={s.num} className="step-card">
+                                <div className="step-number">{s.num}</div>
+                                <h3>{s.title}</h3>
+                                <p>{s.desc}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
             </div>
-        </div>
-    )
+
+            {/* ── Footer ── */}
+            <footer className="footer">
+                <div className="footer-inner">
+                    <div className="footer-logo">KIMCHI VEST</div>
+                    <div className="footer-text">&copy; 2026 Kimchi Vest. All rights reserved.</div>
+                    <div className="footer-links">
+                        <a href="#">Twitter</a>
+                        <a href="#">Discord</a>
+                        <a href="#">Docs</a>
+                    </div>
+                </div>
+            </footer>
+        </>
+    );
 }

@@ -3,8 +3,8 @@ import type { Metadata } from 'next'
 import Providers from '@/components/Providers'
 
 export const metadata: Metadata = {
-    title: 'Kimchi-vest | AI-Powered Pump.fun Prediction Market',
-    description: 'AI가 분석한 실시간 배당률로 펌프펀 졸업을 예측하세요.',
+    title: 'Kimchi Vest | AI-Powered Pump.fun Prediction Oracle',
+    description: 'Predict which Pump.fun tokens will graduate to Raydium. AI-powered analysis meets community wisdom on Solana.',
 }
 
 export default function RootLayout({
@@ -13,7 +13,7 @@ export default function RootLayout({
     children: React.ReactNode
 }) {
     return (
-        <html lang="ko">
+        <html lang="en">
             <body>
                 <Providers>
                     {children}
