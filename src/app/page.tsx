@@ -91,13 +91,28 @@ const features = [
     },
 ];
 
-const predictions = [
-    { name: '$KIMCHI', percent: 85, status: 'graduating' },
-    { name: '$PUMP', percent: 62, status: 'live' },
-    { name: '$SOLMOON', percent: 91, status: 'bonded' },
-    { name: '$DOGE2', percent: 34, status: 'watching' },
-    { name: '$WAGMI', percent: 78, status: 'graduating' },
-];
+interface TokenData {
+    mint: string;
+    name: string;
+    symbol: string;
+    image: string;
+    marketCapSol: number;
+    marketCapUsd: number;
+    graduationScore: number;
+    bondingProgress: number;
+    status: 'bonding' | 'koth' | 'graduated';
+    createdAt: number;
+    lastTradeAt: number;
+    replyCount: number;
+    twitter: string | null;
+    website: string | null;
+}
+
+function getStatusClass(status: string) {
+    if (status === 'graduated') return 'status-bonded';
+    if (status === 'koth') return 'status-graduating';
+    return 'status-live';
+}
 
 const steps = [
     { num: '01', title: 'Connect', desc: 'Link your wallet with one click via Privy.' },
@@ -114,6 +129,9 @@ export default function Home() {
     const [showIntro, setShowIntro] = useState(true);
     const [scrolled, setScrolled] = useState(false);
     const [barsAnimated, setBarsAnimated] = useState(false);
+    const [tokens, setTokens] = useState<TokenData[]>([]);
+    const [solPrice, setSolPrice] = useState(0);
+    const [loading, setLoading] = useState(true);
 
     const featuresRef = useReveal();
     const predictionsRef = useReveal();
@@ -126,6 +144,27 @@ export default function Home() {
         const onScroll = () => setScrolled(window.scrollY > 40);
         window.addEventListener('scroll', onScroll, { passive: true });
         return () => window.removeEventListener('scroll', onScroll);
+    }, []);
+
+    /* Fetch live token data */
+    useEffect(() => {
+        async function fetchTokens() {
+            try {
+                const res = await fetch('/api/tokens?type=bonding&limit=10');
+                const data = await res.json();
+                if (data.tokens?.length) {
+                    setTokens(data.tokens);
+                    setSolPrice(data.solPrice || 0);
+                }
+            } catch (e) {
+                console.error('Failed to fetch tokens:', e);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchTokens();
+        const interval = setInterval(fetchTokens, 30000); // Refresh every 30s
+        return () => clearInterval(interval);
     }, []);
 
     /* Animate prediction bars when section visible */
@@ -215,30 +254,42 @@ export default function Home() {
                             <div className="section-label">Live Feed</div>
                             <h2 className="section-title">Token Predictions</h2>
                             <p className="section-subtitle" style={{ marginBottom: 0 }}>
-                                Real-time graduation probability for trending tokens.
+                                Real-time graduation probability for Pump.fun tokens.
                             </p>
                         </div>
-                        <div className="predictions-accuracy">
-                            <div className="value">98.2%</div>
-                            <div className="label">Global Accuracy</div>
-                        </div>
+                        {solPrice > 0 && (
+                            <div className="predictions-accuracy">
+                                <div className="value">${solPrice.toFixed(0)}</div>
+                                <div className="label">SOL Price</div>
+                            </div>
+                        )}
                     </div>
                     <div className="predictions-list">
-                        {predictions.map((p) => (
-                            <div key={p.name} className="prediction-row">
-                                <span className="prediction-name">{p.name}</span>
-                                <div className="prediction-bar-track">
-                                    <div
-                                        className="prediction-bar-fill"
-                                        style={{ width: barsAnimated ? `${p.percent}%` : '0%' }}
-                                    />
-                                </div>
-                                <span className="prediction-percent">{p.percent}%</span>
-                                <span className={`prediction-status status-${p.status}`}>
-                                    {p.status}
-                                </span>
+                        {loading ? (
+                            <div className="prediction-row" style={{ justifyContent: 'center', opacity: 0.5 }}>
+                                Loading live data...
                             </div>
-                        ))}
+                        ) : tokens.length === 0 ? (
+                            <div className="prediction-row" style={{ justifyContent: 'center', opacity: 0.5 }}>
+                                No tokens found
+                            </div>
+                        ) : (
+                            tokens.map((t) => (
+                                <div key={t.mint} className="prediction-row">
+                                    <span className="prediction-name">${t.symbol}</span>
+                                    <div className="prediction-bar-track">
+                                        <div
+                                            className="prediction-bar-fill"
+                                            style={{ width: barsAnimated ? `${t.graduationScore}%` : '0%' }}
+                                        />
+                                    </div>
+                                    <span className="prediction-percent">{t.graduationScore}%</span>
+                                    <span className={`prediction-status ${getStatusClass(t.status)}`}>
+                                        {t.status}
+                                    </span>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
